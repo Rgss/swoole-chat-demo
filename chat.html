@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>chat</title>
+	<link rel="stylesheet" href="./js/bootstrap.min.css">
+	<script src="./js/jquery.min.js"></script>
+	<script src="./js/json2.js"></script>
+	<script src="./js/common.js"></script>
+	<script src="./js/chat.js"></script>
+	<style>
+		body{height:100%; overflow:hidden; margin:0px; padding:0px;}
+		ul,li{ margin:0; padding: 0; list-style: none}
+		a{text-decoration: none;}
+		.wrapper{ /*padding: 20px;*/ }
+		.chat{  height: 500px; border-BOTTOM: 1px solid #ccc; background:#f3f3f3; overflow-y:auto; width: 100%;}
+		.input{ margin-top: 30px;}
+
+		.clear{clear: both;}
+
+		#layer{
+			width: 100%;
+			height: 100%;
+			position:absolute;
+			z-index:9997;
+			top: 0;
+    		left: 0;
+		}
+		.bg{
+			width: 100%;
+			height: 100%;
+			background:#000;
+			opacity: 0.8;
+			position:absolute;
+			z-index:9998;
+		}
+		
+		.login_box{
+			padding: 20px 20px 20px 20px; 
+			margin: 20px;
+			position: relative;
+			background:#FFF;
+			z-index:9999;
+			border-radius: 5px;
+			display:none;
+		}
+		
+		.system_message_layer{position: absolute; width: 300px; height: 60px; margin-left:-150px; left: 50%; top: 120px; 
+		 z-index: 99997; border-radius: 5px; overflow:hidden;}
+		.system_message_bg{width: 300px; height: 40px; position: absolute; z-index: 99998; background: #000; opacity: 0.8; border-radius: 5px; 
+		overflow:hidden;}
+		.system_message_content{position: absolute;  z-index: 99999; color: #FFF; width: 300px; height: 40px; line-height: 40px; 
+		text-align: center;}
+		
+		
+		.form-control{ height: 40px;}
+		
+		.left_site{float:left; width: 50px;  height: 100%; background: #444343; position:absolute;}
+		
+		.content{ }
+		
+		.header{width: 100%; height: 40px; line-height:40px; background:#f3f3f3; color: #333; font-size: 14px; padding: 0 20px; border-bottom: 1px solid #efeaea; text-align: center;}
+		
+		.menu{}
+		ul.menu li{ text-align: center; height: 50px; line-height: 50px; color: #FFF; position:relative;}
+		ul.menu li a{color: #FFF; height: 50px; line-height: 50px; display: block;}
+		ul.menu li a:hover, ul.menu li a.cur{ background:#000; text-decoration: none;}
+		
+		.notice{    position: absolute;
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background: red;
+    top: -5px;
+    right: -5px;
+	display:none;
+	}
+		
+		
+		.msg_item{ margin-top: 10px;     clear: both; width: 100%;}
+		.msg_item .head{ font-weight: bold; margin-left: 20px; line-height: 2;}
+		.msg_item .content{ background: #FFF; border-radius: 5px; border: 1px solid #eee; width: auto; padding: 7px; max-width: 300px; margin-left: 30px;     font-size: 16px;}
+		
+		.msg_item_me{ float:right;  clear: both;}
+		.msg_item_me .head{float:right; font-weight: bold; margin-right: 20px; line-height: 2;clear:both; }
+		.msg_item_me .content{background: #93e43d;clear:both; margin-right: 30px; float:right; }
+		.msg_item .time{
+			text-align: center; padding: 10px; mfont-size: 12px; color: #dadada; clear: both;}
+			
+		.message{height: 100px; width:100%; border: none; padding: 10px; border-bottom: 1px solid #eee;}	
+			
+		.online_list{background: #f3f3f3;}
+		.online_list ul li a { height: 40px; line-height: 40px; display: block; padding: 0 10px; background: #fcfcfc; border-bottom: 1px solid #eee;}
+		.online_list ul li a:hover { background: #fcfcfc;}
+	</style>
+	<meta name="viewport" content="width=device-width, user-scalable=no,initial-scale=1, maximum-scale=1, minimum-scale=1">
+</head>
+<body>
+
+<div class="wrapper">
+	
+	<div class="left_site" style="">
+		<ul class="menu">
+			<li><a class="menu_item" href="javascript:;" type="setting">头像</a></li>
+			<li><a class="menu_item cur" href="javascript:;" type="chat">聊天</a><span class="notice"></span></li>
+			<li><a class="menu_item" href="javascript:;" type="friend">在线</a></li>
+			<li><a class="menu_item" href="javascript:;" type="setting">设置</a></li>
+		</ul>
+	</div>
+	
+	<div class="content" style="margin-left: 50px;">
+		<div class="header">
+			<div style="float: left;">
+				<span id="current_username"></span>
+			</div>
+			
+			<div>chat chat chat ... ...</div>
+		</div>
+		
+		<div class="main" style="float: left; width: 100%;">
+		
+			<div id="chat_win" style="background:#f3f3f3">
+				<div class="output"></div>  
+				<div style="overflow-y:auto;">
+					<div class="chat" id="chatBox" style="">
+					</div>
+					<div id="msg_end" style="height:0px; overflow:hidden"></div>
+				</div>
+				
+				<div>
+					<div style=" background:#F2F2F2; height: 30px; line-height: 30px; padding-left: 10px;">-_-</div>
+					<textarea type="text" class="message" id="message" name="message" style=""></textarea>
+				</div>
+				
+				<div style="padding: 10px; background:#F3F3F3;">
+					<div style="float: right;"><input type="submit" class="btn btn-primary" id="submit" value="发送"></div>
+					<div class="clear"></div>
+				</div>
+			
+			</div>
+			
+			<div id="friend_win" style="display: none;">
+				<div class="online_list">
+					<ul id="online_users">
+					</ul>
+				</div>
+			</div>
+			
+			<div id="setting_win"  style="display: none;">
+			
+			</div>
+			
+		</div>
+	</div>
+</div>
+
+
+<div style="display: none;">
+	<label><input type="radio" name="talk_uid" class="talk_uid"  value="1">单用户</label> 
+	<label><input type="radio" name="talk_uid" class="talk_uid"   checked="true" value="0">群发</label>
+</div>
+
+<div id="hidden">
+	<input type="hidden"  class="form-control"  name="uid" id="uid"  value="1">
+	<input type="hidden" id="token" name="token" value="">
+</div>
+
+<div id="layer" style="display:;">
+	<div class="bg"></div>
+	
+	<div class="login_box">
+		<div class="form-group">
+		  <label for="username">login chat room</label>
+		</div>
+		<div class="form-group">
+			<label for="username">username</label>
+			<input type="text" class="form-control" id="username" placeholder="username">
+		</div>
+		<div class="form-group">
+			<label for="password">password</label>
+			<input type="password" class="form-control" id="password" placeholder="password">
+		</div>
+		
+		<!-- <button type="submit" id="login" class="btn btn-primary form-control">login</button> -->
+		<button type="submit" id="register" class="btn btn-primary form-control">enter</button>
+		
+		<div class="form-group" style="margin-top: 10px;">
+			base on swoole.
+		</div>
+	</div>
+</div>
+
+<script language="javascript"type="text/javascript">  
+
+// var json = {"cmd":'1000','data':'你好'};
+// res = JSON.stringify(json);
+// console.log(res);
+
+window.onload = function() {
+	
+	var wHeight = $(window).height();
+	var wWidth = $(window).width();
+	$('#chatBox').css('height', wHeight - 175 - 55);
+	
+	window.token = $('#token').val();
+	if (window.token == '') {
+		$('.login_box').slideDown();
+	}
+	
+	// $('#layer').hide();
+};
+	// init web socket
+	var url = 'ws://120.25.210.3:1950';
+	var ws = new WebSocket(url);
+	var chat = new Chat(ws, "chatBox");
+	
+	ws.onopen = function(e) {
+		chat.open(e);
+    }; 
+    ws.onclose = function(e) {
+    	chat.close(e);
+    }; 
+    ws.onmessage = function(e) {
+    	chat.message(e);
+    }; 
+    ws.onerror = function(e) { 
+    	chat.error(e);
+    };
+
+    
+    websock_close = true;
+
+    $(function() {
+    	
+    	$('#submit').click(function(r) {
+    		var message = $('#message').val();
+    		if (message == '') { 
+    			return false;
+    		}
+    		
+    		$('#message').val('');
+    		
+    		var talk_uid = $('input:radio[name="talk_uid"]:checked').val();
+    		var uid = $('#uid').val();
+    		
+    		if (talk_uid == 0) {
+    			cmd = 2002;
+    		} else {
+    			cmd = 2001;
+    		}
+   		
+    		var token = $('#token').val();
+
+    		json = {'cmd':cmd,'data':{'uid':uid, 'message':message}, 'token':token};
+    		message = JSON.stringify(json);
+    		console.log("send: " + message);
+    		chat.send(message);
+    	});
+    	
+    	
+    	// login
+    	$('#login').click(function() {
+    		var username = $('#username').val();
+    		var password = $('#password').val();
+    		var cmd = 1001;
+    		
+    		var json = {'cmd':cmd,'data':{'username':username, 'password':password}};
+    		var message = JSON.stringify(json);
+    		
+    		console.log("login.");
+    		chat.send(message);
+    	});
+    	
+    	// register
+    	$('#register').click(function() {
+    		var username = $('#username').val();
+    		var password = $('#password').val();
+    		var cmd = 1002;
+    		
+    		if (username == '' || password == '') {
+    			Message.show('用户名密码不能为空');
+    			return;
+    		}
+    		
+    		var json = {'cmd':cmd,'data':{'username':username, 'password':password}};
+    		var message = JSON.stringify(json);
+    		
+    		chat.send(message);
+    		
+    		// pull online
+    		json = {'cmd':4001,'data':{}, 'token':''};
+    		message = JSON.stringify(json);
+    		chat.send(message);
+    		
+    	});
+    	
+    	// menu_item
+    	$('.menu_item').click(function() {
+    		$('.menu_item').each(function() {
+    			var type = $(this).attr('type');
+    			$('#' + type + '_win').hide();
+    			
+    			$(this).removeClass('cur');
+    		});
+    		
+    		var type = $(this).attr('type');
+    		$('#' + type + '_win').show();
+    		
+    		if (type == 'chat') {
+    			$('.notice').hide();
+    		}
+    		
+    		$(this).addClass('cur');
+    	});
+    	
+    	// display
+    	$('#chatBox').click(function() {
+    		$('.notice').hide();
+    	});
+    	
+    });
+</script>  
+</body>
+</html>
